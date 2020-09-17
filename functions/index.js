@@ -5,10 +5,10 @@ admin.initializeApp()
 const db = admin.firestore();
 
 exports.saveBlueprint = functions.https.onCall(async (data, context) => {
-  const { userId, id, details } = data  // TODO: вместо userId спользовать uid
+  const { userId, id, blueprint } = data  // TODO: вместо userId спользовать uid
 
   if (!userId) return Promise.reject(new Error('doesn`t have userId'))
-  if (!details) return Promise.reject(new Error('doesn`t have details'))  
+  if (!blueprint) return Promise.reject(new Error('doesn`t have blueprint'))  
 
   // const uid = context.auth.uid
   // const name = context.auth.token.name || null
@@ -16,13 +16,14 @@ exports.saveBlueprint = functions.https.onCall(async (data, context) => {
   // const email = context.auth.token.email || null
 
   console.log('=======================================')
-  console.log('DATA = ', data)
+  console.log('userId = ', userId)
+  console.log('id = ', id)
+  console.log('blueprint = ', blueprint)
   console.log('=======================================')
 
   const blueprintId = id || new Date().toISOString()
-  const blueprintData = { details }
-
-  await db.collection(`blueprints/users/${userId}`).doc(blueprintId).set(blueprintData)   // TODO: вместо userId спользовать uid
+  
+  await db.collection(`blueprints/users/${userId}`).doc(blueprintId).set(JSON.parse(blueprint))   // TODO: вместо userId спользовать uid
 
   return Promise.resolve(JSON.stringify({ blueprintId }))
 })

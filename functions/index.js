@@ -8,7 +8,7 @@ exports.saveBlueprint = functions.https.onCall(async (data, context) => {
   // TODO: вместо userId спользовать uid
   const { userId, id, blueprint } = data
 
-  const blueprintId = id || new Date().toISOString()
+  const blueprintId = id || `${userId}:${new Date().getTime()}`
 
   if (!userId) return Promise.reject(new Error('doesn`t have userId'))
   if (!blueprint) return Promise.reject(new Error('doesn`t have blueprint'))  
@@ -42,7 +42,9 @@ exports.loadBlueprintsPage = functions.https.onCall(async (data, context) => {
   if (isNaN(limit)) return Promise.reject(new Error('limit is NaN'))
 
   try {
-    const snapshot = await db.collection(`blueprints/users/${userId}`).get()
+    const snapshot = await db.collection(`blueprints/users/${userId}`)
+      .orderBy('updatedAt', 'desc').get()
+
     const blueprints = snapshot.docs.map(doc => ({ 
       id: doc.id,
     }))

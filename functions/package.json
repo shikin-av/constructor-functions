@@ -1,9 +1,9 @@
 {
   "name": "constructor-functions",
-  "description": "Cloud Functions for Firebase",
+  "description": "Firebase Cloud Functions for Constructor",
   "author": "shikin.a.v@mail.ru",
   "scripts": {
-    "lint": "eslint .",
+    "lint": "",
     "serve": "firebase emulators:start --only functions",
     "shell": "firebase functions:shell",
     "start": "npm run shell",

@@ -70,15 +70,16 @@ exports.loadBlueprint = functions.https.onCall(async (data, context) => {
 
   try {
     const doc = await db.collection(`blueprints/users/${userId}`).doc(id).get()
-    
-    console.log('=======================================')
-    console.log('BLUEPRINT = ', JSON.stringify({ doc }))
-    console.log('=======================================')
 
     if (!doc.exists) {
       return Promise.reject(new Error(`No such document! ${id}`))
     } else {
       const blueprint = doc.data();
+
+      console.log('=======================================')
+      console.log('BLUEPRINT = ', JSON.stringify(blueprint))
+      console.log('=======================================')
+
       return Promise.resolve(JSON.stringify(blueprint))
     }
   } catch (e) {

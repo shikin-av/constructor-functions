@@ -8,7 +8,7 @@ exports.saveBlueprint = functions.https.onCall(async (data, context) => {
   // TODO: вместо userId спользовать uid
   const { userId, id, blueprint } = data
 
-  const blueprintId = id || `${userId}:${new Date().getTime()}`
+  const blueprintId = id || `${userId}_${new Date().getTime()}`
 
   if (!userId) return Promise.reject(new Error('doesn`t have userId'))
   if (!blueprint) return Promise.reject(new Error('doesn`t have blueprint'))  
@@ -21,6 +21,7 @@ exports.saveBlueprint = functions.https.onCall(async (data, context) => {
   console.log('=======================================')
   console.log('userId = ', userId)
   console.log('id = ', id)
+  console.log('blueprintId = ', blueprintId)
   console.log('blueprint = ', blueprint)
   console.log('=======================================')
   

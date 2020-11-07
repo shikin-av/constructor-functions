@@ -1,6 +1,6 @@
 ### Firebase Cloud Functions for Constructor
 
-npm i -S firebase
+npm i firebase-tools -g
 
 firebase login
 

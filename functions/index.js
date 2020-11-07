@@ -48,6 +48,7 @@ exports.loadBlueprintsPage = functions.https.onCall(async (data, context) => {
 
     const blueprints = snapshot.docs.map(doc => ({ 
       id: doc.id,
+      userId,
     }))
 
     // TODO - вернуть мобилке только id-шники и только стартуя с startAt с количеством limit
@@ -76,6 +77,7 @@ exports.loadBlueprint = functions.https.onCall(async (data, context) => {
       return Promise.reject(new Error(`No such document! ${id}`))
     } else {
       const blueprint = doc.data();
+      blueprint.userId = userId;
 
       console.log('=======================================')
       console.log('BLUEPRINT = ', JSON.stringify(blueprint))

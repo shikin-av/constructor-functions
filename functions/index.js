@@ -4,14 +4,23 @@ const admin = require('firebase-admin')
 admin.initializeApp() 
 const db = admin.firestore();
 
-exports.saveBlueprint = functions.https.onCall(async (data, context) => {
+exports.saveBlueprintPart = functions.https.onCall(async (data, context) => {
   // TODO: вместо userId спользовать uid
-  const { userId, id, blueprint } = data
+  let { userId, id, part } = data
+  part = JSON.parse(part)
 
-  const blueprintId = id || `${userId}_${new Date().getTime()}`
+  // const blueprintId = id || `${userId}_${new Date().getTime()}`
 
   if (!userId) return Promise.reject(new Error('doesn`t have userId'))
-  if (!blueprint) return Promise.reject(new Error('doesn`t have blueprint'))  
+  if (!id) return Promise.reject(new Error(`uncorrect id ${id}`))
+  if (!part) return Promise.reject(new Error('doesn`t have part'))
+  if (
+    !part.added || !Array.isArray(part.added) ||
+    !part.changed || !Array.isArray(part.changed) ||
+    !part.deleted || !Array.isArray(part.deleted)
+  ) {
+    return Promise.reject(new Error(`Uncorrect "part" data  ${part}`))
+  }
 
   // const uid = context.auth.uid
   // const name = context.auth.token.name || null
@@ -21,14 +30,50 @@ exports.saveBlueprint = functions.https.onCall(async (data, context) => {
   console.log('=======================================')
   console.log('userId = ', userId)
   console.log('id = ', id)
-  console.log('blueprintId = ', blueprintId)
-  console.log('blueprint = ', blueprint)
+  console.log('part = ', JSON.stringify(part))
   console.log('=======================================')
   
-  // TODO: set(JSON.parse({ blueprint, imageUrl })
   try {
-    await db.collection(`blueprints/users/${userId}`).doc(blueprintId).set(JSON.parse(blueprint))
-    return Promise.resolve(JSON.stringify({ blueprintId }))
+    const doc = await db.collection(`blueprints/users/${userId}`).doc(id).get()
+    if (!doc.exists) {
+      return Promise.reject(new Error(`No such document! ${id}`))
+    } else {
+      let blueprint = doc.data();
+
+      // changed
+      if (part.changed.length) {
+        for (let changedDetail of part.changed) {
+          const index = blueprint.details.findIndex(detail => detail.id == changedDetail.id)
+          if (index !== -1) {
+            blueprint.details[index] = changedDetail
+            console.log('changed ', JSON.stringify(changedDetail))
+          }
+        }
+      }
+      // deleted
+      if (part.deleted.length) {
+        for (let deletedDetail of part.deleted) {
+          const index = blueprint.details.findIndex(detail => detail.id == deletedDetail.id)
+          if (index !== -1) {
+            blueprint.details.splice(index, 1)
+            console.log('deleted ', JSON.stringify(deletedDetail))
+          }
+        }
+      }
+      // added
+      if (part.added.length) {
+        for (let addedDetail of part.added) {
+          const index = blueprint.details.findIndex(detail => detail.id == addedDetail.id)
+          if (index === -1) {
+            blueprint.details.push(addedDetail)
+            console.log('added ', JSON.stringify(addedDetail))
+          }
+        }
+      }
+
+      await db.collection(`blueprints/users/${userId}`).doc(id).set(blueprint)
+      return Promise.resolve(JSON.stringify({ id }))
+    }
   } catch(e) {
     return Promise.reject(new Error(`can't save blueprint ${id} - ${e}`))
   }
@@ -46,10 +91,20 @@ exports.loadBlueprintsPage = functions.https.onCall(async (data, context) => {
     const snapshot = await db.collection(`blueprints/users/${userId}`)
       .orderBy('updatedAt', 'desc').get()
 
-    const blueprints = snapshot.docs.map(doc => ({ 
+    const snapshot2 = await db.collection(`blueprints/users/Ronaldo`)
+      .orderBy('updatedAt', 'desc').get()
+
+    const blueprints1 = snapshot.docs.map(doc => ({ 
       id: doc.id,
       userId,
     }))
+
+    const blueprints2 = snapshot2.docs.map(doc => ({ 
+      id: doc.id,
+      userId: 'Ronaldo',
+    }))
+
+    const blueprints = [...blueprints1, ...blueprints2]
 
     // TODO - вернуть мобилке только id-шники и только стартуя с startAt с количеством limit
     // TODO - вместе с id возвращать doc.data().imageUrl

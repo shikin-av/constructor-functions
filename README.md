@@ -1,5 +1,6 @@
 ### Firebase Cloud Functions for Constructor
 
+#### preparing
 npm i firebase-tools -g
 
 firebase login
@@ -28,3 +29,6 @@ service firebase.storage {
 
 #### PowerShell allow script execution (as Administrator)
 Set-ExecutionPolicy Unrestricted
+
+#### artifact bucket
+https://console.cloud.google.com/storage/browser?project=constructor-2de11

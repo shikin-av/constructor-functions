@@ -15,9 +15,9 @@ exports.saveBlueprintPart = functions.https.onCall(async (data, context) => {
   if (!id) return Promise.reject(new Error(`uncorrect id ${id}`))
   if (!part) return Promise.reject(new Error('doesn`t have part'))
   if (
-    !part.added || !Array.isArray(part.added) ||
-    !part.changed || !Array.isArray(part.changed) ||
-    !part.deleted || !Array.isArray(part.deleted)
+    !Array.isArray(part.added) ||
+    !Array.isArray(part.changed) ||
+    !Array.isArray(part.deleted)
   ) {
     return Promise.reject(new Error(`Uncorrect "part" data  ${part}`))
   }

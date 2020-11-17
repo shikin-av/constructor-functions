@@ -6,13 +6,11 @@ const db = admin.firestore();
 
 exports.saveBlueprintPart = functions.https.onCall(async (data, context) => {
   // TODO: вместо userId спользовать uid
-  let { userId, id, part } = data
+  let { userId, id, part, isNew } = data
   part = JSON.parse(part)
 
-  // const blueprintId = id || `${userId}_${new Date().getTime()}`
-
   if (!userId) return Promise.reject(new Error('doesn`t have userId'))
-  if (!id) return Promise.reject(new Error(`uncorrect id ${id}`))
+  if (!id) return Promise.reject(new Error('doesn`t have id'))
   if (!part) return Promise.reject(new Error('doesn`t have part'))
   if (
     !Array.isArray(part.added) ||
@@ -31,52 +29,76 @@ exports.saveBlueprintPart = functions.https.onCall(async (data, context) => {
   console.log('userId = ', userId)
   console.log('id = ', id)
   console.log('part = ', JSON.stringify(part))
+  console.log(`isNew = ${isNew}  (${typeof isNew})`)
   console.log('=======================================')
   
-  try {
-    const doc = await db.collection(`blueprints/users/${userId}`).doc(id).get()
-    if (!doc.exists) {
-      return Promise.reject(new Error(`No such document! ${id}`))
-    } else {
-      let blueprint = doc.data();
+  let blueprint = {}
 
-      // changed
-      if (part.changed.length) {
-        for (let changedDetail of part.changed) {
-          const index = blueprint.details.findIndex(detail => detail.id == changedDetail.id)
-          if (index !== -1) {
-            blueprint.details[index] = changedDetail
-            console.log('changed ', JSON.stringify(changedDetail))
-          }
-        }
-      }
-      // deleted
-      if (part.deleted.length) {
-        for (let deletedDetail of part.deleted) {
-          const index = blueprint.details.findIndex(detail => detail.id == deletedDetail.id)
-          if (index !== -1) {
-            blueprint.details.splice(index, 1)
-            console.log('deleted ', JSON.stringify(deletedDetail))
-          }
-        }
-      }
-      // added
-      if (part.added.length) {
-        for (let addedDetail of part.added) {
-          const index = blueprint.details.findIndex(detail => detail.id == addedDetail.id)
-          if (index === -1) {
-            blueprint.details.push(addedDetail)
-            console.log('added ', JSON.stringify(addedDetail))
-          }
-        }
-      }
-
-      await db.collection(`blueprints/users/${userId}`).doc(id).set(blueprint)
-      return Promise.resolve(JSON.stringify({ id }))
+  if (isNew) {
+    console.log('NEW BLUEPRINT ', id)
+    blueprint = {
+      details: [],
+      userName: userId,
     }
-  } catch(e) {
+
+    /* TODO: проверка - если bl с таким id уже есть 
+    * => сгенерить новый id и вернуть на клиент
+    * return Promise.resolve(JSON.stringify({ id }))
+    */
+
+  } else {
+    try {
+      const doc = await db.collection(`blueprints/users/${userId}`).doc(id).get()
+      if (!doc.exists) {
+        return Promise.reject(new Error(`No such document! ${id}`))
+      } else {
+        blueprint = doc.data();
+      }
+    } catch(e) {
+      return Promise.reject(new Error(`can't get blueprint ${id} - ${e}`))
+    }
+  }
+  
+  blueprint.updatedAt = new Date().getTime()
+
+  // changed
+  if (part.changed.length) {
+    for (let changedDetail of part.changed) {
+      const index = blueprint.details.findIndex(detail => detail.id == changedDetail.id)
+      if (index !== -1) {
+        blueprint.details[index] = changedDetail
+        console.log('changed ', JSON.stringify(changedDetail))
+      }
+    }
+  }
+  // deleted
+  if (part.deleted.length) {
+    for (let deletedDetail of part.deleted) {
+      const index = blueprint.details.findIndex(detail => detail.id == deletedDetail.id)
+      if (index !== -1) {
+        blueprint.details.splice(index, 1)
+        console.log('deleted ', JSON.stringify(deletedDetail))
+      }
+    }
+  }
+  // added
+  if (part.added.length) {
+    for (let addedDetail of part.added) {
+      const index = blueprint.details.findIndex(detail => detail.id == addedDetail.id)
+      if (index === -1) {
+        blueprint.details.push(addedDetail)
+        console.log('added ', JSON.stringify(addedDetail))
+      }
+    }
+  }
+
+  try {
+    await db.collection(`blueprints/users/${userId}`).doc(id).set(blueprint)
+    return Promise.resolve(JSON.stringify({ id }))
+  } catch (e) {
     return Promise.reject(new Error(`can't save blueprint ${id} - ${e}`))
   }
+  
 })
 
 exports.loadBlueprintsPage = functions.https.onCall(async (data, context) => {

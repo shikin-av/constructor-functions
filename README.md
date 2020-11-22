@@ -15,6 +15,12 @@ firebase deploy --only storage
 
 #### ------------------------------------------
 
+#### local
+
+firebase emulators:start
+
+#### ------------------------------------------
+
 #### default storage.rules
 ```
 rules_version = '2';

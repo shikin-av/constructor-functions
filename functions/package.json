@@ -4,7 +4,7 @@
   "author": "shikin.a.v@mail.ru",
   "scripts": {
     "lint": "",
-    "serve": "firebase emulators:start --only functions",
+    "serve": "firebase emulators:start",
     "shell": "firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",

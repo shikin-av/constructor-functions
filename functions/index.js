@@ -38,7 +38,7 @@ exports.saveBlueprintPart = functions.https.onCall(async (data, context) => {
     console.log('NEW BLUEPRINT ', id)
     blueprint = {
       details: [],
-      userName: userId,
+      userId,
     }
 
     /* TODO: проверка - если bl с таким id уже есть 

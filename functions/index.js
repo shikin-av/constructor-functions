@@ -4,9 +4,9 @@ const admin = require('firebase-admin')
 admin.initializeApp() 
 const db = admin.firestore();
 
-exports.saveBlueprintPart = functions.https.onCall(async (data, context) => {
+exports.saveMyBlueprintPart = functions.https.onCall(async (data, context) => {
   // TODO: вместо userId спользовать uid
-  let { userId, id, part, isNew } = data
+  let { userId, id, part } = data
   part = JSON.parse(part)
 
   if (!userId) return Promise.reject(new Error('doesn`t have userId'))
@@ -29,36 +29,30 @@ exports.saveBlueprintPart = functions.https.onCall(async (data, context) => {
   console.log('userId = ', userId)
   console.log('id = ', id)
   console.log('part = ', JSON.stringify(part))
-  console.log(`isNew = ${isNew}  (${typeof isNew})`)
+  // console.log(`isNew = ${isNew}  (${typeof isNew})`)
   console.log('=======================================')
   
   let blueprint = {}
 
-  if (isNew) {
-    console.log('NEW BLUEPRINT ', id)
-    blueprint = {
-      details: [],
-      userId,
-    }
+  //   /* TODO: проверка - если bl с таким id уже есть 
+  //   * => сгенерить новый id и вернуть на клиент
+  //   * return Promise.resolve(JSON.stringify({ id }))
+  //   */
 
-    /* TODO: проверка - если bl с таким id уже есть 
-    * => сгенерить новый id и вернуть на клиент
-    * return Promise.resolve(JSON.stringify({ id }))
-    */
-
-  } else {
-    try {
-      const doc = await db.collection(`blueprints/users/${userId}`).doc(id).get()
-      if (!doc.exists) {
-        return Promise.reject(new Error(`No such document! ${id}`))
-      } else {
-        blueprint = doc.data();
+  try {
+    const doc = await db.collection(`blueprints/users/${userId}`).doc(id).get()
+    if (!doc.exists) {  // new
+      blueprint = {
+        details: [],
+        userId,
       }
-    } catch(e) {
-      return Promise.reject(new Error(`can't get blueprint ${id} - ${e}`))
+    } else {
+      blueprint = doc.data();
     }
+  } catch(e) {
+    return Promise.reject(new Error(`can't get blueprint ${userId} ${id} - ${e}`))
   }
-  
+
   blueprint.updatedAt = new Date().getTime()
 
   // changed
@@ -101,7 +95,7 @@ exports.saveBlueprintPart = functions.https.onCall(async (data, context) => {
   
 })
 
-exports.loadBlueprintsPage = functions.https.onCall(async (data, context) => {
+exports.loadMyBlueprintsPage = functions.https.onCall(async (data, context) => {
   // TODO: вместо userId спользовать uid
   const { userId, startAt, limit } = data
 
@@ -113,20 +107,10 @@ exports.loadBlueprintsPage = functions.https.onCall(async (data, context) => {
     const snapshot = await db.collection(`blueprints/users/${userId}`)
       .orderBy('updatedAt', 'desc').get()
 
-    const snapshot2 = await db.collection(`blueprints/users/Ronaldo`)
-      .orderBy('updatedAt', 'desc').get()
-
-    const blueprints1 = snapshot.docs.map(doc => ({ 
-      id: doc.id,
-      userId,
-    }))
-
-    const blueprints2 = snapshot2.docs.map(doc => ({ 
-      id: doc.id,
-      userId: 'Ronaldo',
-    }))
-
-    const blueprints = [...blueprints1, ...blueprints2]
+      const blueprints = snapshot.docs.map(doc => ({ 
+        id: doc.id,
+        userId,
+      }))
 
     // TODO - вернуть мобилке только id-шники и только стартуя с startAt с количеством limit
     // TODO - вместе с id возвращать doc.data().imageUrl
@@ -142,7 +126,7 @@ exports.loadBlueprintsPage = functions.https.onCall(async (data, context) => {
 })
 
 exports.loadBlueprint = functions.https.onCall(async (data, context) => {
-  const { userId, id } = data
+  const { userId, id, my } = data // TODO: обработать 'my'
 
   if (!userId) return Promise.reject(new Error('doesn`t have userId'))
   if (!id) return Promise.reject(new Error('doesn`t have id'))

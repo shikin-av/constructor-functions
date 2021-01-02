@@ -1,7 +1,7 @@
 const { functions, db } = require('./common')
 
-const loadBlueprint = functions.https.onCall(async (data, context) => {
-  const { userId, id, my } = data // TODO: обработать 'my'
+const loadStoryBlueprint = functions.https.onCall(async (data, context) => {
+  const { userId, id } = data
 
   if (!userId) return Promise.reject(new Error('doesn`t have userId'))
   if (!id) return Promise.reject(new Error('doesn`t have id'))
@@ -26,4 +26,4 @@ const loadBlueprint = functions.https.onCall(async (data, context) => {
   }  
 })
 
-module.exports = loadBlueprint
+module.exports = loadStoryBlueprint

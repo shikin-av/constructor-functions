@@ -51,6 +51,16 @@ const saveMyBlueprintPart = functions.https.onCall(async (data, context) => {
 
   blueprint.updatedAt = new Date().getTime()
 
+  // added
+  if (part.added.length) {
+    for (let addedDetail of part.added) {
+      const index = blueprint.details.findIndex(detail => detail.id == addedDetail.id)
+      if (index === -1) {
+        blueprint.details.push(addedDetail)
+        console.log('added ', JSON.stringify(addedDetail))
+      }
+    }
+  }
   // changed
   if (part.changed.length) {
     for (let changedDetail of part.changed) {
@@ -68,16 +78,6 @@ const saveMyBlueprintPart = functions.https.onCall(async (data, context) => {
       if (index !== -1) {
         blueprint.details.splice(index, 1)
         console.log('deleted ', JSON.stringify(deletedDetail))
-      }
-    }
-  }
-  // added
-  if (part.added.length) {
-    for (let addedDetail of part.added) {
-      const index = blueprint.details.findIndex(detail => detail.id == addedDetail.id)
-      if (index === -1) {
-        blueprint.details.push(addedDetail)
-        console.log('added ', JSON.stringify(addedDetail))
       }
     }
   }

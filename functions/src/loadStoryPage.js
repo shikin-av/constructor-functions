@@ -1,6 +1,8 @@
 const { functions, db } = require('./common')
 
-const loadMyBlueprintsPage = functions.https.onCall(async (data, context) => {
+// TODO: пока это копия loadMyBlueprintsPage
+
+const loadStoryPage = functions.https.onCall(async (data, context) => {
   // TODO: вместо userId спользовать uid
   const { userId, startAt, limit } = data
 
@@ -29,4 +31,4 @@ const loadMyBlueprintsPage = functions.https.onCall(async (data, context) => {
   }
 })
 
-module.exports = loadMyBlueprintsPage
+module.exports = loadStoryPage

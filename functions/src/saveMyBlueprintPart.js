@@ -8,12 +8,8 @@ const saveMyBlueprintPart = functions.https.onCall(async (data, context) => {
   if (!userId) return Promise.reject(new Error('doesn`t have userId'))
   if (!id) return Promise.reject(new Error('doesn`t have id'))
   if (!part) return Promise.reject(new Error('doesn`t have part'))
-  if (
-    !Array.isArray(part.added) ||
-    !Array.isArray(part.changed) ||
-    !Array.isArray(part.deleted)
-  ) {
-    return Promise.reject(new Error(`Uncorrect "part" data  ${part}`))
+  if (!Array.isArray(part)) {
+    return Promise.reject(new Error(`"part" must be an array - ${part}`))
   }
 
   // const uid = context.auth.uid
@@ -25,7 +21,6 @@ const saveMyBlueprintPart = functions.https.onCall(async (data, context) => {
   console.log('userId = ', userId)
   console.log('id = ', id)
   console.log('part = ', JSON.stringify(part))
-  // console.log(`isNew = ${isNew}  (${typeof isNew})`)
   console.log('=======================================')
   
   let blueprint = {}
@@ -51,35 +46,31 @@ const saveMyBlueprintPart = functions.https.onCall(async (data, context) => {
 
   blueprint.updatedAt = new Date().getTime()
 
-  // added
-  if (part.added.length) {
-    for (let addedDetail of part.added) {
-      const index = blueprint.details.findIndex(detail => detail.id == addedDetail.id)
-      if (index === -1) {
-        blueprint.details.push(addedDetail)
-        console.log('added ', JSON.stringify(addedDetail))
-      }
-    }
-  }
-  // changed
-  if (part.changed.length) {
-    for (let changedDetail of part.changed) {
-      const index = blueprint.details.findIndex(detail => detail.id == changedDetail.id)
-      if (index !== -1) {
-        blueprint.details[index] = changedDetail
-        console.log('changed ', JSON.stringify(changedDetail))
-      }
-    }
-  }
-  // deleted
-  if (part.deleted.length) {
-    for (let deletedDetail of part.deleted) {
-      const index = blueprint.details.findIndex(detail => detail.id == deletedDetail.id)
-      if (index !== -1) {
+  for (let partDetail of part) {
+    const type = partDetail.t
+    delete partDetail.t
+    const index = blueprint.details.findIndex(detail => detail.id == partDetail.id)
+
+    if (type == 'a') {
+      if (index >= 0) {
         blueprint.details.splice(index, 1)
-        console.log('deleted ', JSON.stringify(deletedDetail))
+      }
+      blueprint.details.push(partDetail)
+    }
+    else 
+    if (type == 'c') {
+      if (index >= 0) {
+        blueprint.details[index] = partDetail
+      } else {
+        blueprint.details.push(partDetail)
       }
     }
+    else 
+    if (type === 'd') {
+      if (index >= 0) {
+        blueprint.details.splice(index, 1)
+      }
+    } 
   }
 
   try {

@@ -12,10 +12,14 @@ const loadMyBlueprintsPage = functions.https.onCall(async (data, context) => {
     const snapshot = await db.collection(`blueprints/users/${userId}`)
       .orderBy('updatedAt', 'desc').get()
 
-      const blueprints = snapshot.docs.map(doc => ({ 
-        id: doc.id,
-        userId,
-      }))
+      const blueprints = snapshot.docs.map(doc => {
+        const { errors } = doc.data()
+        return {
+          id: doc.id,
+          userId,
+          errors: errors ? JSON.parse(errors) : false,
+        }
+      })
 
     // TODO - стартуя с startAt с количеством limit
 

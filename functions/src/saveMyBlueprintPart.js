@@ -2,7 +2,7 @@ const { functions, db } = require('./common')
 
 const saveMyBlueprintPart = functions.https.onCall(async (data, context) => {
   // TODO: вместо userId спользовать uid
-  let { userId, id, part, errors } = data
+  let { userId, id, part, /*errors*/ } = data
   part = JSON.parse(part)
 
   if (!userId) return Promise.reject(new Error('doesn`t have userId'))
@@ -21,7 +21,7 @@ const saveMyBlueprintPart = functions.https.onCall(async (data, context) => {
   console.log('userId = ', userId)
   console.log('id = ', id)
   console.log('part = ', JSON.stringify(part))
-  console.log('errors = ', errors)
+  // console.log('errors = ', errors)
   console.log('=======================================')
   
   let blueprint = {}
@@ -46,7 +46,7 @@ const saveMyBlueprintPart = functions.https.onCall(async (data, context) => {
   }
 
   blueprint.updatedAt = new Date().getTime()
-  blueprint.errors = JSON.parse(errors)
+  // blueprint.errors = JSON.parse(errors)
 
   for (let partDetail of part) {
     const type = partDetail.t

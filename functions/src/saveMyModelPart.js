@@ -1,6 +1,6 @@
 const { functions, db } = require('./common')
 
-const saveMyBlueprintPart = functions.https.onCall(async (data, context) => {
+const saveMyModelPart = functions.https.onCall(async (data, context) => {
   // TODO: вместо userId спользовать uid
   let { userId, id, part, /*errors*/ } = data
   part = JSON.parse(part)
@@ -24,7 +24,7 @@ const saveMyBlueprintPart = functions.https.onCall(async (data, context) => {
   // console.log('errors = ', errors)
   console.log('=======================================')
   
-  let blueprint = {}
+  let model = {}
 
   //   /* TODO: проверка - если bl с таким id уже есть 
   //   * => сгенерить новый id и вернуть на клиент
@@ -32,55 +32,55 @@ const saveMyBlueprintPart = functions.https.onCall(async (data, context) => {
   //   */
 
   try {
-    const doc = await db.collection(`blueprints/users/${userId}`).doc(id).get()
+    const doc = await db.collection(`models/users/${userId}`).doc(id).get()
     if (!doc.exists) {  // new
-      blueprint = {
+      model = {
         details: [],
         userId,
       }
     } else {
-      blueprint = doc.data();
+      model = doc.data();
     }
   } catch(e) {
-    return Promise.reject(new Error(`can't get blueprint ${userId} ${id} - ${e}`))
+    return Promise.reject(new Error(`can't get model ${userId} ${id} - ${e}`))
   }
 
-  blueprint.updatedAt = new Date().getTime()
-  // blueprint.errors = JSON.parse(errors)
+  model.updatedAt = new Date().getTime()
+  // model.errors = JSON.parse(errors)
 
   for (let partDetail of part) {
     const type = partDetail.t
     delete partDetail.t
-    const index = blueprint.details.findIndex(detail => detail.id == partDetail.id)
+    const index = model.details.findIndex(detail => detail.id == partDetail.id)
 
     if (type == 'a') {
       if (index >= 0) {
-        blueprint.details.splice(index, 1)
+        model.details.splice(index, 1)
       }
-      blueprint.details.push(partDetail)
+      model.details.push(partDetail)
     }
     else 
     if (type == 'c') {
       if (index >= 0) {
-        blueprint.details[index] = partDetail
+        model.details[index] = partDetail
       } else {
-        blueprint.details.push(partDetail)
+        model.details.push(partDetail)
       }
     }
     else 
     if (type === 'd') {
       if (index >= 0) {
-        blueprint.details.splice(index, 1)
+        model.details.splice(index, 1)
       }
     } 
   }
 
   try {
-    await db.collection(`blueprints/users/${userId}`).doc(id).set(blueprint)
+    await db.collection(`models/users/${userId}`).doc(id).set(model)
     return Promise.resolve(JSON.stringify({ id }))
   } catch (e) {
-    return Promise.reject(new Error(`can't save blueprint ${id} - ${e}`))
+    return Promise.reject(new Error(`can't save model ${id} - ${e}`))
   }
 })
 
-module.exports = saveMyBlueprintPart
+module.exports = saveMyModelPart

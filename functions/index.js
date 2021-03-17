@@ -1,8 +1,8 @@
-exports.loadMyBlueprintsPage = require('./src/loadMyBlueprintsPage')
-exports.loadMyBlueprint = require('./src/loadMyBlueprint')
-exports.saveMyBlueprintPart = require('./src/saveMyBlueprintPart')
-exports.deleteMyBlueprint = require('./src/deleteMyBlueprint')
+exports.loadMyModelsPage = require('./src/loadMyModelsPage')
+exports.loadMyModel = require('./src/loadMyModel')
+exports.saveMyModelPart = require('./src/saveMyModelPart')
+exports.deleteMyModel = require('./src/deleteMyModel')
 
 exports.loadStoryPage = require('./src/loadStoryPage')
-exports.loadStoryBlueprint = require('./src/loadStoryBlueprint')
+exports.loadStoryModel = require('./src/loadStoryModel')
 

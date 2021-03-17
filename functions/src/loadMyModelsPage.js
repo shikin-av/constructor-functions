@@ -1,6 +1,6 @@
 const { functions, db } = require('./common')
 
-const loadMyBlueprintsPage = functions.https.onCall(async (data, context) => {
+const loadMyModelsPage = functions.https.onCall(async (data, context) => {
   // TODO: вместо userId спользовать uid
   const { userId, startAt, limit } = data
 
@@ -9,10 +9,10 @@ const loadMyBlueprintsPage = functions.https.onCall(async (data, context) => {
   if (isNaN(limit)) return Promise.reject(new Error('limit is NaN'))
 
   try {
-    const snapshot = await db.collection(`blueprints/users/${userId}`)
+    const snapshot = await db.collection(`models/users/${userId}`)
       .orderBy('updatedAt', 'desc').get()
 
-      const blueprints = snapshot.docs.map(doc => {
+      const models = snapshot.docs.map(doc => {
         // const { errors } = doc.data()
         return {
           id: doc.id,
@@ -24,13 +24,13 @@ const loadMyBlueprintsPage = functions.https.onCall(async (data, context) => {
     // TODO - стартуя с startAt с количеством limit
 
     console.log('=======================================')
-    console.log('BLUEPRINTS = ', JSON.stringify({ blueprints }))
+    console.log('MODELS = ', JSON.stringify({ models }))
     console.log('=======================================')
 
-    return Promise.resolve(JSON.stringify({ blueprints }))
+    return Promise.resolve(JSON.stringify({ models }))
   } catch(e) {
-    return Promise.reject(new Error(`can't load blueprint page with userId:${userId}, startAt:${startAt}, limit:${limit} - ${e}`))
+    return Promise.reject(new Error(`can't load model page with userId:${userId}, startAt:${startAt}, limit:${limit} - ${e}`))
   }
 })
 
-module.exports = loadMyBlueprintsPage
+module.exports = loadMyModelsPage

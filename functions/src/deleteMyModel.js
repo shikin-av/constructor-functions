@@ -1,20 +1,20 @@
 const { functions, db, bucket } = require('./common')
 
-const deleteMyBlueprint = functions.https.onCall(async (data, context) => {
+const deleteMyModel = functions.https.onCall(async (data, context) => {
   const { userId, id } = data
 
   if (!userId) return Promise.reject(new Error('doesn`t have userId'))
   if (!id) return Promise.reject(new Error('doesn`t have id'))
 
-  // Delete blueprint
+  // Delete model
   try {
-    await db.collection(`blueprints/users/${userId}`).doc(id).delete();
+    await db.collection(`models/users/${userId}`).doc(id).delete();
 
     console.log('=======================================')
-    console.log('Delete blueprint = ', id)
+    console.log('Delete model = ', id)
     
   } catch (e) {
-    return Promise.reject(new Error(`can't delete blueprint ${id} - ${e}`))
+    return Promise.reject(new Error(`can't delete model ${id} - ${e}`))
   }
 
   // Delete image
@@ -33,4 +33,4 @@ const deleteMyBlueprint = functions.https.onCall(async (data, context) => {
   return Promise.resolve(JSON.stringify({ id }))
 })
 
-module.exports = deleteMyBlueprint
+module.exports = deleteMyModel

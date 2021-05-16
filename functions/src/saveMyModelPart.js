@@ -68,12 +68,14 @@ const saveMyModelPart = functions.https.onCall(async (data, context) => {
       }
     }
     else 
-    if (type === 'd') {
+    if (type == 'd') {
       if (index >= 0) {
         model.details.splice(index, 1)
       }
     } 
   }
+
+  model.details = model.details.sort((d1, d2) => d1.q - d2.q)
 
   try {
     await db.collection(`models/users/${userId}`).doc(id).set(model)

@@ -12,6 +12,12 @@ firebase-debug.*.log*
 
 # Firebase config
 
+# Firebase log
+firebase-debug.log
+firestore-debug.log
+pubsub-debug.log
+ui-debug.log
+
 # Uncomment this if you'd like others to create their own Firebase project.
 # For a team working on the same Firebase project(s), it is recommended to leave
 # it commented so all members can deploy to the same project(s) in .firebaserc.
@@ -46,6 +52,7 @@ build/Release
 
 # Dependency directories
 node_modules/
+functions/node_modules/
 
 # Optional npm cache directory
 .npm
